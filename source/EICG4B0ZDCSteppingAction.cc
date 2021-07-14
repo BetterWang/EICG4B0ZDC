@@ -35,12 +35,12 @@
 
 #include <TSystem.h>
 
-#include <Geant4/G4ParticleDefinition.hh> 
+#include <Geant4/G4ParticleDefinition.hh>
 #include <Geant4/G4ReferenceCountedHandle.hh>
 #include <Geant4/G4Step.hh>
-#include <Geant4/G4StepPoint.hh> 
+#include <Geant4/G4StepPoint.hh>
 #include <Geant4/G4StepStatus.hh>
-#include <Geant4/G4String.hh> 
+#include <Geant4/G4String.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>
 #include <Geant4/G4TouchableHandle.hh>
@@ -50,6 +50,8 @@
 #include <Geant4/G4VPhysicalVolume.hh>
 #include <Geant4/G4VTouchable.hh>
 #include <Geant4/G4VUserTrackInformation.hh>
+#include <Geant4/G4NavigationHistory.hh>
+
 
 #include <cmath>
 #include <iostream>
@@ -119,7 +121,7 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
   // if you deal with multiple detectors in this stepping action
   // the detector id can be used to distinguish between them
   // hits can easily be analyzed later according to their detector id
-  int detector_id = 0;  // we use here only one detector in this simple example
+  int detector_id = m_Detector->GetDetId(volume);
   bool geantino = false;
   // the check for the pdg code speeds things up, I do not want to make
   // an expensive string compare for every track when we know
@@ -133,10 +135,10 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
   G4StepPoint *prePoint = aStep->GetPreStepPoint();
   G4StepPoint *postPoint = aStep->GetPostStepPoint();
 
-// Here we have to decide if we need to create a new hit.  Normally this should 
+// Here we have to decide if we need to create a new hit.  Normally this should
 // only be neccessary if a G4 Track enters a new volume or is freshly created
 // For this we look at the step status of the prePoint (beginning of the G4 Step).
-// This should be either fGeomBoundary (G4 Track crosses into volume) or 
+// This should be either fGeomBoundary (G4 Track crosses into volume) or
 // fUndefined (G4 Track newly created)
 // Sadly over the years with different G4 versions we have observed cases where
 // G4 produces "impossible hits" which we try to catch here
@@ -144,7 +146,7 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
 // still check for them for safety. We can reproduce G4 runs identically (if given
 // the sequence of random number seeds you find in the log), the printouts help
 // us giving the G4 support information about those failures
-// 
+//
   switch (prePoint->GetStepStatus())
   {
   case fPostStepDoItProc:
@@ -174,6 +176,7 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
       std::cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
            << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
     }
+    break;
 // These are the normal cases
   case fGeomBoundary:
   case fUndefined:
@@ -181,11 +184,15 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
     {
       m_Hit = new PHG4Hitv1();
     }
-    m_Hit->set_layer(detector_id);
+    m_Hit->set_hit_type(detector_id);
     // here we set the entrance values in cm
-    m_Hit->set_x(0, prePoint->GetPosition().x() / cm);
-    m_Hit->set_y(0, prePoint->GetPosition().y() / cm);
-    m_Hit->set_z(0, prePoint->GetPosition().z() / cm);
+    {
+        G4ThreeVector worldPosition = prePoint->GetPosition();
+        G4ThreeVector localPosition = touch->GetHistory()->GetTopTransform().TransformPoint(worldPosition);
+        m_Hit->set_x(0, localPosition.x() / cm);
+        m_Hit->set_y(0, localPosition.y() / cm);
+        m_Hit->set_z(0, localPosition.z() / cm);
+    }
     // time in ns
     m_Hit->set_t(0, prePoint->GetGlobalTime() / nanosecond);
     // set the track ID
@@ -292,9 +299,12 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
     {
       // update values at exit coordinates and set keep flag
       // of track to keep
-      m_Hit->set_x(1, postPoint->GetPosition().x() / cm);
-      m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
-      m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
+
+    G4ThreeVector worldPosition = postPoint->GetPosition();
+    G4ThreeVector localPosition = touch->GetHistory()->GetTopTransform().TransformPoint(worldPosition);
+      m_Hit->set_x(1, localPosition.x() / cm);
+      m_Hit->set_y(1, localPosition.y() / cm);
+      m_Hit->set_z(1, localPosition.z() / cm);
       m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
       if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
       {
@@ -323,6 +333,7 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
       if (whichactive > 0)
       {
         m_Hit->set_eion(m_EionSum);
+        m_Hit->set_hit_type(detector_id);
       }
       m_SaveHitContainer->AddHit(detector_id, m_Hit);
       // ownership has been transferred to container, set to null
@@ -345,6 +356,7 @@ bool EICG4B0ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_u
 void EICG4B0ZDCSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
 {
   std::string hitnodename = "G4HIT_" + m_Detector->GetName();
+//  std::cout << " ---> !!! hitnodename: " << hitnodename << std::endl;
   // now look for the map and grab a pointer to it.
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, hitnodename);
   // if we do not find the node we need to make it.

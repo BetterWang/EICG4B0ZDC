@@ -29,11 +29,11 @@
 /vis/open OGL 1200x900-0+0
 # increase display limit for more complex detectors
 /vis/ogl/set/displayListLimit 500000
-/vis/viewer/set/viewpointThetaPhi 240 -40
+#/vis/viewer/set/viewpointThetaPhi 240 -40
 /vis/viewer/addCutawayPlane 0 0 0 m 0 -1 0
 # our world is 4x4 meters, the detector is about 1m across
 # zooming by 4 makes it fill the display
-/vis/viewer/zoom 1.5
+#/vis/viewer/zoom 1.5
 #
 # Use this open statement instead to get a HepRep version 1 file
 # suitable for viewing in WIRED.
@@ -80,3 +80,10 @@
 # The first file will contain just detector geometry.
 # The second file will contain the detector plus one event.
 # The third file will contain the detector plus ten events.
+
+
+
+# pan2B0ZDC
+/vis/viewer/set/viewpointThetaPhi -60. -40.
+/vis/viewer/panTo -1000 500 cm
+/vis/viewer/zoomTo 5.

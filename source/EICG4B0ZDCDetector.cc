@@ -6,14 +6,14 @@
 // Currently this installs a simple G4Box solid, creates a logical volume from it
 // and places it. Put your own detector in place (just make sure all active volumes
 // get inserted into the m_PhysicalVolumesSet)
-// 
+//
 // Rather than using hardcoded values you should consider using the parameter class
 // Parameter names and defaults are set in EICG4B0ZDCSubsystem::SetDefaultParameters()
 // Only parameters defined there can be used (also to override in the macro)
 // to avoids typos.
 // IMPORTANT: parameters have no inherent units, there is a convention (cm/deg)
-// but in any case you need to multiply them here with the correct CLHEP/G4 unit 
-// 
+// but in any case you need to multiply them here with the correct CLHEP/G4 unit
+//
 // The place where you put your own detector is marked with
 // //begin implement your own here://
 // //end implement your own here://
@@ -26,7 +26,7 @@
 
 #include <g4main/PHG4Detector.h>
 
-#include <Geant4/G4Box.hh>
+#include <Geant4/G4Tubs.hh>
 #include <Geant4/G4Color.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
@@ -63,34 +63,50 @@ int EICG4B0ZDCDetector::IsInDetector(G4VPhysicalVolume *volume) const
   return 0;
 }
 
+int EICG4B0ZDCDetector::GetDetId(G4VPhysicalVolume *volume) const
+{
+    if ( IsInDetector(volume) ) {
+        return 1;
+    }
+    return -1;
+}
+
 //_______________________________________________________________
 void EICG4B0ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
  //begin implement your own here://
  // Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
-  double xdim = m_Params->get_double_param("size_x") * cm;
-  double ydim = m_Params->get_double_param("size_y") * cm;
-  double zdim = m_Params->get_double_param("size_z") * cm;
-  G4VSolid *solidbox = new G4Box("EICG4B0ZDCSolid", xdim / 2., ydim / 2., zdim / 2.);
-  G4LogicalVolume *logical = new G4LogicalVolume(solidbox, G4Material::GetMaterial(m_Params->get_string_param("material")), "EICG4B0ZDCLogical");
+  G4VSolid *solid = new G4Tubs("EICG4B0ZDCSolid",
+          0.,
+          m_Params->get_double_param("outer_radius") * cm,
+          m_Params->get_double_param("length")/2. * cm,
+          0., 360.*degree);
+  G4LogicalVolume *logical = new G4LogicalVolume(solid,
+          G4Material::GetMaterial("G4_PbWO4"), //G4Material::GetMaterial(m_Params->get_string_param("material")),
+          "EICG4B0ZDCLogical");
 
-  G4VisAttributes *vis = new G4VisAttributes(G4Color(G4Colour::Grey()));  // grey is good to see the tracks in the display
+  G4VisAttributes *vis = new G4VisAttributes(G4Color(0.8, 0.2, 0.2, 0.9));
   vis->SetForceSolid(true);
   logical->SetVisAttributes(vis);
   G4RotationMatrix *rotm = new G4RotationMatrix();
-  rotm->rotateX(m_Params->get_double_param("rot_x") * deg);
   rotm->rotateY(m_Params->get_double_param("rot_y") * deg);
-  rotm->rotateZ(m_Params->get_double_param("rot_z") * deg);
+//  rotm->rotateY(0. * deg);
 
   G4VPhysicalVolume *phy = new G4PVPlacement(
       rotm,
       G4ThreeVector(m_Params->get_double_param("place_x") * cm,
                     m_Params->get_double_param("place_y") * cm,
                     m_Params->get_double_param("place_z") * cm),
+//      G4ThreeVector(0. * cm,
+//                    0. * cm,
+//                    0. * cm),
       logical, "EICG4B0ZDC", logicWorld, 0, false, OverlapCheck());
   // add it to the list of placed volumes so the IsInDetector method
   // picks them up
   m_PhysicalVolumesSet.insert(phy);
+  // hard code detector id to 1
+  m_PhysicalVolumesDet.insert({phy, 1});
+//  m_LogicalVolumesSet.insert(logical);
  //end implement your own here://
   return;
 }
@@ -107,3 +123,6 @@ void EICG4B0ZDCDetector::Print(const std::string &what) const
   }
   return;
 }
+
+PHParameters * EICG4B0ZDCDetector::getParams()
+{ return m_Params; }

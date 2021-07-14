@@ -27,8 +27,9 @@ R__LOAD_LIBRARY(libg4detectors.so)
 R__LOAD_LIBRARY(libEICG4B0ZDC.so)
 R__LOAD_LIBRARY(libg4histos.so)
 
+EICG4B0ZDCSubsystem *mydet = nullptr;
 // needs 10000 geantinos to make a decent scan plot
-void Fun4All_G4_EICG4B0ZDC(int nEvents = 10000)
+void Fun4All_G4_EICG4B0ZDC(int nEvents = -1)
 {
   ///////////////////////////////////////////
   // Make the Server
@@ -74,8 +75,8 @@ void Fun4All_G4_EICG4B0ZDC(int nEvents = 10000)
   g4Reco->set_field(0);
   g4Reco->save_DST_geometry(false);
 
-  EICG4B0ZDCSubsystem *mydet = new EICG4B0ZDCSubsystem("EICG4B0ZDC1");
-  mydet->SetActive();
+  mydet = new EICG4B0ZDCSubsystem("EICG4B0ZDC");
+  mydet->SetActive(true);
   g4Reco->registerSubsystem(mydet);
 
   // mydet = new EICG4B0ZDCSubsystem("EICG4B0ZDC2");

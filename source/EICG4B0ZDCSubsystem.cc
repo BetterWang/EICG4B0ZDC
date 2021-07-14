@@ -16,11 +16,11 @@
 #include <phparameter/PHParameters.h>
 
 #include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4SteppingAction.h> 
+#include <g4main/PHG4SteppingAction.h>
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>
-#include <phool/PHNode.h> 
+#include <phool/PHNode.h>
 #include <phool/PHNodeIterator.h>
 #include <phool/PHObject.h>
 #include <phool/getClass.h>
@@ -106,12 +106,9 @@ void EICG4B0ZDCSubsystem::SetDefaultParameters()
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);
   set_default_double_param("place_z", 0.);
-  set_default_double_param("rot_x", 0.);
   set_default_double_param("rot_y", 0.);
-  set_default_double_param("rot_z", 0.);
-  set_default_double_param("size_x", 20.);
-  set_default_double_param("size_y", 20.);
-  set_default_double_param("size_z", 20.);
+  set_default_double_param("outer_radius", 2.);
+  set_default_double_param("length", 10.);
 
-  set_default_string_param("material", "G4_Cu");
+  set_default_string_param("material", "G4_PbWO4");
 }

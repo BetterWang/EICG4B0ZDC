@@ -18,12 +18,18 @@
 #include <fun4all/Fun4AllOutputManager.h>
 #include <fun4all/Fun4AllServer.h>
 
+#include <eicg4b0zdc/EICG4B0ZDCSubsystem.h>
+#include <eicg4b0zdc/EICG4B0ZDCHitTree.h>
+
 #include <phool/recoConsts.h>
+#include <vector>
 
 R__LOAD_LIBRARY(libfun4all.so)
 
+EICG4B0ZDCSubsystem *mydet = nullptr;
+
 int Fun4All_G4_EICDetector(
-    const int nEvents = 1,
+    const int nEvents = 100,
     const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const string &outputFile = "G4EICDetector.root",
     const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
@@ -86,7 +92,7 @@ int Fun4All_G4_EICDetector(
   //   Input::SARTRE = true;
 
   // Simple multi particle generator in eta/phi/pt ranges
-  Input::SIMPLE = true;
+  Input::SIMPLE = false;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
@@ -162,10 +168,15 @@ int Fun4All_G4_EICDetector(
   // particle gun
   // if you run more than one of these Input::GUN_NUMBER > 1
   // add the settings for other with [1], next with [2]...
+  double Eneutron = 100.*MeV;
+  double x_ang = 26*mrad;
   if (Input::GUN)
   {
-    INPUTGENERATOR::Gun[0]->AddParticle("neutron", 0, 0, 1);
+    //INPUTGENERATOR::Gun[0]->AddParticle("neutron", 0, 0, 100.*MeV);
     INPUTGENERATOR::Gun[0]->set_vtx(0, 0, 0);
+    INPUTGENERATOR::Gun[0]->set_name("gamma");
+//    INPUTGENERATOR::Gun[0]->set_mom(0., 0., Eneutron);
+    INPUTGENERATOR::Gun[0]->set_mom(-Eneutron*x_ang, 0., Eneutron);
   }
   // pythia6
   if (Input::PYTHIA6)
@@ -235,7 +246,7 @@ int Fun4All_G4_EICDetector(
   // Enable::DSTREADER = true;
 
   // turn the display on (default off)
-  Enable::DISPLAY = true;
+  Enable::DISPLAY = false;
 
   //======================
   // What to run
@@ -515,6 +526,24 @@ int Fun4All_G4_EICDetector(
     if (Enable::DSTOUT_COMPRESS) DstCompress(out);
     se->registerOutputManager(out);
   }
+
+  //-----------------
+  // B0ZDC
+  //-----------------
+  mydet = new EICG4B0ZDCSubsystem("EICG4B0ZDC");
+  mydet->set_double_param("place_x", 0);
+  mydet->set_double_param("place_y", 0);
+  mydet->set_double_param("place_z", 48);
+  mydet->set_double_param("outer_radius", 20.);
+  mydet->SetActive(true);
+  mydet->SetMotherSubsystem(hFarFwdBeamLine::B0Magnet);
+  PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
+  g4->registerSubsystem(mydet);
+
+  EICG4B0ZDCHitTree *b0tree = new EICG4B0ZDCHitTree("Hits");
+  b0tree->AddNode("EICG4B0ZDC_0", 1);
+  se->registerSubsystem(b0tree);
+
 
   //-----------------
   // Event processing

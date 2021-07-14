@@ -12,6 +12,7 @@ AM_LDFLAGS = \
   -L$(OFFLINE_MAIN)/lib64
 
 pkginclude_HEADERS = \
+  EICG4B0ZDCHitTree.h \
   EICG4B0ZDCSubsystem.h
 
 lib_LTLIBRARIES = \
@@ -20,6 +21,7 @@ lib_LTLIBRARIES = \
 libEICG4B0ZDC_la_SOURCES = \
   EICG4B0ZDCSubsystem.cc\
   EICG4B0ZDCDetector.cc\
+  EICG4B0ZDCHitTree.cc\
   EICG4B0ZDCSteppingAction.cc
 
 libEICG4B0ZDC_la_LIBADD = \
