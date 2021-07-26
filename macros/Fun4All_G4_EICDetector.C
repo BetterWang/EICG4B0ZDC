@@ -30,9 +30,9 @@ EICG4B0ZDCSubsystem *mydet = nullptr;
 
 int Fun4All_G4_EICDetector(
     const int nEvents = 100,
-    const string &inputFile = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
+    const double Energy = 100.,
+    const string &ZDCoutputFile = "ZDC.root",
     const string &outputFile = "G4EICDetector.root",
-    const string &embed_input_file = "https://www.phenix.bnl.gov/WWW/publish/phnxbld/sPHENIX/files/sPHENIX_G4Hits_sHijing_9-11fm_00000_00010.root",
     const int skip = 0,
     const string &outdir = ".")
 {
@@ -68,7 +68,7 @@ int Fun4All_G4_EICDetector(
   // about the number of layers used for the cell reco code
   //
   //Input::READHITS = true;
-  INPUTREADHITS::filename[0] = inputFile;
+  //INPUTREADHITS::filename[0] = inputFile;
   // if you use a filelist
   // INPUTREADHITS::listfile[0] = inputFile;
 
@@ -78,7 +78,7 @@ int Fun4All_G4_EICDetector(
   // all other options only play a role if it is active
   // In case embedding into a production output, please double check your G4Setup_EICDetector.C and G4_*.C consistent with those in the production macro folder
   //  Input::EMBED = true;
-  INPUTEMBED::filename[0] = embed_input_file;
+  //INPUTEMBED::filename[0] = embed_input_file;
   // if you use a filelist
   //INPUTEMBED::listfile[0] = embed_input_file;
 
@@ -110,12 +110,12 @@ int Fun4All_G4_EICDetector(
 
   // eic-smear output
   //  Input::READEIC = true;
-  INPUTREADEIC::filename = inputFile;
+  //INPUTREADEIC::filename = inputFile;
 
   // HepMC2 files
   //  Input::HEPMC = true;
   Input::VERBOSITY = 0;
-  INPUTHEPMC::filename = inputFile;
+  //INPUTHEPMC::filename = inputFile;
 
   //-----------------
   // Initialize the selected Input/Event generation
@@ -168,7 +168,7 @@ int Fun4All_G4_EICDetector(
   // particle gun
   // if you run more than one of these Input::GUN_NUMBER > 1
   // add the settings for other with [1], next with [2]...
-  double Eneutron = 100.*MeV;
+  double Eneutron = Energy*MeV;
   double x_ang = 26*mrad;
   if (Input::GUN)
   {
@@ -534,13 +534,14 @@ int Fun4All_G4_EICDetector(
   mydet->set_double_param("place_x", 0);
   mydet->set_double_param("place_y", 0);
   mydet->set_double_param("place_z", 48);
+  mydet->set_double_param("length", 20);
   mydet->set_double_param("outer_radius", 20.);
   mydet->SetActive(true);
   mydet->SetMotherSubsystem(hFarFwdBeamLine::B0Magnet);
   PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco("PHG4RECO");
   g4->registerSubsystem(mydet);
 
-  EICG4B0ZDCHitTree *b0tree = new EICG4B0ZDCHitTree("Hits");
+  EICG4B0ZDCHitTree *b0tree = new EICG4B0ZDCHitTree("Hits", ZDCoutputFile.c_str());
   b0tree->AddNode("EICG4B0ZDC_0", 1);
   se->registerSubsystem(b0tree);
 

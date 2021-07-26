@@ -76,6 +76,8 @@ void EICG4B0ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
  //begin implement your own here://
  // Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
+  cout << " !!! length = " << m_Params->get_double_param("length");
+
   G4VSolid *solid = new G4Tubs("EICG4B0ZDCSolid",
           0.,
           m_Params->get_double_param("outer_radius") * cm,
@@ -85,7 +87,7 @@ void EICG4B0ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
           G4Material::GetMaterial("G4_PbWO4"), //G4Material::GetMaterial(m_Params->get_string_param("material")),
           "EICG4B0ZDCLogical");
 
-  G4VisAttributes *vis = new G4VisAttributes(G4Color(0.8, 0.2, 0.2, 0.9));
+  G4VisAttributes *vis = new G4VisAttributes(G4Color(0.8, 0.4, 0.2, 1.0));
   vis->SetForceSolid(true);
   logical->SetVisAttributes(vis);
   G4RotationMatrix *rotm = new G4RotationMatrix();
