@@ -21,7 +21,7 @@ struct ZDCB0plot {
         c1.SaveAs( (s+"_XZ.pdf").c_str() );
         h2DYZ->Draw("colz");
         c1.SaveAs( (s+"_YZ.pdf").c_str() );
-        hEtot->Draw();
+        hEtot->Draw("hist");
         c1.SetLogy();
         c1.SetLogz(0);
         c1.SaveAs( (s+"_E.pdf").c_str() );
@@ -31,13 +31,13 @@ struct ZDCB0plot {
 void plot()
 {
     gStyle->SetOptStat(1111);
-    TFile * fZDC100MeV = new TFile("output_ZDCB0_gamma_100MeV.root");
-    TFile * fZDC300MeV = new TFile("output_ZDCB0_gamma_300MeV.root");
-    TFile * fZDC500MeV = new TFile("output_ZDCB0_gamma_500MeV.root");
-    TFile * fZDC1GeV   = new TFile("output_ZDCB0_gamma_1GeV.root");
-    TFile * fZDC3GeV   = new TFile("output_ZDCB0_gamma_3GeV.root");
-    TFile * fZDC5GeV   = new TFile("output_ZDCB0_gamma_5GeV.root");
-    TFile * fZDC10GeV  = new TFile("output_ZDCB0_gamma_10GeV.root");
+    TFile * fZDC100MeV = new TFile("output_ZDCB0_20cm_gamma_100MeV.root");
+    TFile * fZDC300MeV = new TFile("output_ZDCB0_20cm_gamma_300MeV.root");
+    TFile * fZDC500MeV = new TFile("output_ZDCB0_20cm_gamma_500MeV.root");
+    TFile * fZDC1GeV   = new TFile("output_ZDCB0_20cm_gamma_1GeV.root");
+    TFile * fZDC3GeV   = new TFile("output_ZDCB0_20cm_gamma_3GeV.root");
+    TFile * fZDC5GeV   = new TFile("output_ZDCB0_20cm_gamma_5GeV.root");
+    TFile * fZDC10GeV  = new TFile("output_ZDCB0_20cm_gamma_10GeV.root");
 
     ZDCB0plot zdc100MeV(fZDC100MeV);
     ZDCB0plot zdc300MeV(fZDC300MeV);
@@ -47,12 +47,12 @@ void plot()
     ZDCB0plot zdc5GeV(fZDC5GeV);
     ZDCB0plot zdc10GeV(fZDC10GeV);
 
-    zdc100MeV.MakePlot("out100MeV");
-    zdc300MeV.MakePlot("out300MeV");
-    zdc500MeV.MakePlot("out500MeV");
-    zdc1GeV.MakePlot("out1GeV");
-    zdc3GeV.MakePlot("out3GeV");
-    zdc5GeV.MakePlot("out5GeV");
-    zdc10GeV.MakePlot("out10GeV");
+    zdc100MeV.MakePlot("out100MeV20cm");
+    zdc300MeV.MakePlot("out300MeV20cm");
+    zdc500MeV.MakePlot("out500MeV20cm");
+    zdc1GeV.MakePlot("out1GeV20cm");
+    zdc3GeV.MakePlot("out3GeV20cm");
+    zdc5GeV.MakePlot("out5GeV20cm");
+    zdc10GeV.MakePlot("out10GeV20cm");
 
 }

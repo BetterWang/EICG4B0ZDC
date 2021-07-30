@@ -48,8 +48,8 @@ void process(string fname = "ZDCB0_gamma_100MeV.root", double E = 100.)
     trV->SetBranchAddress("edep", &edep);
 
     TH2D * h2DXY = new TH2D("h2DXY", "h2DXY;X(cm);Y(cm)", 400, -20., 20., 400, -20., 20.);
-    TH2D * h2DXZ = new TH2D("h2DXZ", "h2DXZ;X(cm);Z(cm)", 400, -20., 20., 100, -5., 5.);
-    TH2D * h2DYZ = new TH2D("h2DYZ", "h2DYZ;Y(cm);Z(cm)", 400, -20., 20., 100, -5., 5.);
+    TH2D * h2DXZ = new TH2D("h2DXZ", "h2DXZ;X(cm);Z(cm)", 400, -20., 20., 100, -10., 10.);
+    TH2D * h2DYZ = new TH2D("h2DYZ", "h2DYZ;Y(cm);Z(cm)", 400, -20., 20., 100, -10., 10.);
     TH1D * hEtot = new TH1D("hEtot", "hEtot;E/Etot", 11, 0, 1.1);
 
     unsigned int Nevt = trV->GetEntries();
