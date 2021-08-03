@@ -27,6 +27,7 @@
 #include <g4main/PHG4Detector.h>
 
 #include <Geant4/G4Tubs.hh>
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4Color.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
@@ -78,12 +79,18 @@ void EICG4B0ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
  // Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
   cout << " !!! length = " << m_Params->get_double_param("length");
 
-  G4VSolid *solid = new G4Tubs("EICG4B0ZDCSolid",
+  G4VSolid *solid0 = new G4Tubs("EICG4B0ZDCSolid0",
           0.,
           m_Params->get_double_param("outer_radius") * cm,
           m_Params->get_double_param("length")/2. * cm,
           0., 360.*degree);
-  G4LogicalVolume *logical = new G4LogicalVolume(solid,
+  G4VSolid *solidPipe = new G4Tubs("EICG4B0ZDCIonPipeSolid",
+        0.,
+        5.*cm,
+        m_Params->get_double_param("length")/2. * cm,
+        0., 360.*degree);
+  G4SubtractionSolid *solidZDC = new G4SubtractionSolid("EICG4B0ZDCSolid", solid0, solidPipe, 0, G4ThreeVector(-3.4*cm, 0, 0));
+  G4LogicalVolume *logical = new G4LogicalVolume(solidZDC,
           G4Material::GetMaterial("G4_PbWO4"), //G4Material::GetMaterial(m_Params->get_string_param("material")),
           "EICG4B0ZDCLogical");
 
